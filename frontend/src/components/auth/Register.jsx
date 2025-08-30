@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { register } from '../../services/api';
+import { motion } from 'framer-motion';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -9,13 +11,25 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement registration logic
-    // For demo, just navigate to login
-    navigate('/login');
+    setError('');
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      const { confirmPassword, ...registerData } = formData;
+      await register(registerData);
+      navigate('/admin/users');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
+    }
   };
 
   const handleChange = (e) => {
